@@ -36,7 +36,7 @@ n_points = 0
 length = 0
 
 # Getting our AI, which we call "brain", and that contains our neural network that represents our Q-function
-brain = TD3(28,8,1)
+brain = TD3(5,3,1)
 if os.path.isfile('last_actor.pth') and os.path.isfile('last_critic.pth'):
     print(' Attempting to load models before starting ')
     brain.load_models()
@@ -140,7 +140,7 @@ class Game(Widget):
 
     def serve_car(self):
         self.car.center = self.center
-        self.car.velocity = Vector(6, 0)
+        self.car.velocity = Vector(1, 0)
 
     def update(self, dt):
 
@@ -163,11 +163,11 @@ class Game(Widget):
         xx = goal_x - self.car.x
         yy = goal_y - self.car.y
         orientation = Vector(*self.car.velocity).angle((xx,yy))/180.
-        last_signal = [self.car.signal1, self.car.signal2, self.car.signal3, orientation, -orientation] + 23*[0]
+        last_signal = [self.car.signal1, self.car.signal2, self.car.signal3, orientation, -orientation]
         # action = brain.update(last_reward, last_signal)
         action = brain.select_action(last_reward, np.array(last_signal), done)
         # scores.append(brain.score())
-        rotation = action2rotation[-action]
+        rotation = action2rotation[action]
         self.car.move(rotation)
         distance = np.sqrt((self.car.x - goal_x)**2 + (self.car.y - goal_y)**2)
         self.ball1.pos = self.car.sensor1

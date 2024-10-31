@@ -12,7 +12,7 @@ import torch.optim as optim
 import torch.autograd as autograd
 from torch.autograd import Variable
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = 'cpu'#torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class ReplayBuffer(object):
     def __init__(self, max_size=1e6):
@@ -156,8 +156,10 @@ class TD3(object):
         #         print(f' Training at {self.total_time_steps} for {self.train_iterations}')
         #         self.train()
         
-        state = torch.Tensor(state.reshape(1, -1)).to(device)        
-        probs = F.softmax(self.actor(Variable(state, volatile = True))*100)
+        state = torch.Tensor(state.reshape(1, -1)).to(device) 
+        #probs = F.softmax(self.actor(Variable(state, volatile = True))*100)
+        with torch.no_grad():
+            probs = F.softmax(self.actor(state) * 100)
         # if self.total_time_steps < 10_000 and self.total_time_steps > 500:
         #     # probs = torch.rand(size=(1, 3))
         #     # probs /= probs.sum()
@@ -267,8 +269,8 @@ class TD3(object):
     # Making a load method to load pre-trained models
     def load_models(self):
         if os.path.isfile('last_actor.pth') and os.path.isfile('last_critic.pth'):
-            self.actor.load_state_dict(torch.load('last_actor.pth'))
-            self.critic.load_state_dict(torch.load('last_critic.pth'))
+            self.actor.load_state_dict(torch.load('last_actor.pth', device))
+            self.critic.load_state_dict(torch.load('last_critic.pth', device))
             print(f'Critic & actor models loaded from checkpoints...')
         else:
             print("no checkpoint found...")
